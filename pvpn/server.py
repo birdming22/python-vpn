@@ -208,12 +208,14 @@ class IKEv2Session:
     def __init__(self, args, sessions, peer_spi):
         self.args = args
         self.sessions = sessions
-        self.my_spi = os.urandom(8)
+        #self.my_spi = os.urandom(8)
+        self.my_spi = bytes.fromhex('1b93e12ae42672b8')
         self.peer_spi = peer_spi
         self.peer_msgid = 0
         self.my_crypto = None
         self.peer_crypto = None
-        self.my_nonce = os.urandom(32)
+        #self.my_nonce = os.urandom(32)
+        self.my_nonce = bytes.fromhex('0da0543dddedd8cb8f078a562d5bd4ae0f71ca90122a6a1bf0eef82d05afb9fc')
         self.peer_nonce = None
         self.state = State.INITIAL
         self.request_data = None
@@ -232,6 +234,11 @@ class IKEv2Session:
         keymat_fmt = struct.Struct('>{0}s{1}s{1}s{2}s{2}s{0}s{0}s'.format(prf.key_size, integ.key_size, cipher.key_size))
         keymat = prf.prfplus(skeyseed, self.peer_nonce+self.my_nonce+self.peer_spi+self.my_spi)
         self.sk_d, sk_ai, sk_ar, sk_ei, sk_er, sk_pi, sk_pr = keymat_fmt.unpack(bytes(next(keymat) for _ in range(keymat_fmt.size)))
+        print(f'skeyseed={skeyseed.hex()}')
+        print(f'sk_ei={sk_ei.hex()}')
+        print(f'sk_er={sk_er.hex()}')
+        print(f'sk_ai={sk_ai.hex()}')
+        print(f'sk_ar={sk_ar.hex()}')
         self.my_crypto = crypto.Crypto(cipher, sk_er, integ, sk_ar, prf, sk_pr)
         self.peer_crypto = crypto.Crypto(cipher, sk_ei, integ, sk_ai, prf, sk_pi)
     def create_child_key(self, child_proposal, nonce_i, nonce_r):
@@ -525,6 +532,8 @@ def main():
     parser.add_argument('-v', dest='v', action='count', help='print verbose output')
     parser.add_argument('--version', action='version', version=f'{__title__} {__version__}')
     args = parser.parse_args()
+    print(type(args))
+    print(args)
     args.DIRECT = pproxy.DIRECT
     loop = asyncio.get_event_loop()
     sessions = {}

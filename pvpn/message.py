@@ -1,5 +1,5 @@
 import struct, io, collections, os, random, ipaddress
-from . import enums
+from . import enums, crypto
 
 class Payload:
     def __init__(self, type, critical=False):
@@ -278,7 +278,10 @@ class Proposal:
         for t in self.transforms:
             if t.type not in transformtypes:
                 transformtypes.add(t.type)
+                if t.id == enums.PrfId.PRF_AES128_XCBC:
+                    t = t._replace(id=enums.PrfId.PRF_HMAC_SHA2_256)
                 transforms.append(t)
+                print('++++++ transforms.id: ', t.id)
         return Proposal(self.num, self.protocol, self.spi, transforms)
     def get_transform(self, type):
         return next((x for x in self.transforms if x.type == type), None)

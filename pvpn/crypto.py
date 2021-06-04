@@ -214,7 +214,8 @@ def DiffieHellman(group, peer):
     if group not in PRIMES:
         raise Exception(f'Unsupported DH Group DH_{group}')
     p, g, l = PRIMES[group]
-    a = random.randrange(p>>8, p)
+    #a = random.randrange(p>>8, p)
+    a = 62377472513263950587357864369819932990567040692278309744105689110073956975005
     if callable(g):
         return g(a, l), g(a, peer)
     elif type(g) is tuple:
